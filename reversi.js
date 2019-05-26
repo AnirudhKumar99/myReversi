@@ -1,8 +1,16 @@
+function getIndex(arr,elt){
+    for(let a in arr){
+        if (arr[a][0]==elt[0] && arr[a][1]==elt[1]){
+            return a;
+        }
+    }
+}
 class Reversi {
     // Constructor function for the board
     constructor() {
         //Array to store the alive coins' positions
         this.positions = [];
+        this.status=[];
         this.changeColors = [];
         this.whites = 0;
         this.blacks = 0;
@@ -11,6 +19,7 @@ class Reversi {
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 this.positions.push([j, i]);
+                this.status.push(0);
             }
         }
         this.emptyPositions = [];
@@ -127,11 +136,17 @@ class Reversi {
             // console.log(this.coinAt(moux, mouy))
             if (this.coinAt(moux, mouy) === null) {
                 // console.log('mouse cood ', moux, mouy);
-
+                this.status=[];
+                for(let i=0;i<64;i++){
+                    this.status.push(0)
+                }
+                let index=getIndex(this.positions,[moux,mouy]);
+                this.status[int(index)]=1;
                 let co = new Coin(int((moux + 0.55) * 100), int((mouy + 0.55) * 100), 90, col, currentColor);
 
                 this.coins.push(co);
                 // console.log(this.coins.length);
+
             }
             currentColor = (currentColor == 'white') ? 'black' : 'white';
             this.possiblePos();
@@ -221,15 +236,18 @@ class Reversi {
             }
             pop();
         }
-        for (let pos of this.positions) {
+        let positions=this.positions;
+        for (let pos in positions) {
             rectMode(CENTER);
-            if (this.isPoss(pos[0], pos[1]))
+            if (this.isPoss(positions[pos][0], positions[pos][1]))
                 fill(255, 0, 0, 100);
+            else if(this.status[pos])
+                fill(30, 100, 30);
             else
-                fill(30, 255, 30);
+                fill(30,255,30);
 
             strokeWeight(3);
-            rect((pos[0] + 0.55) * 100, (pos[1] + 0.55) * 100, 100, 100, 5);
+            rect((positions[pos][0] + 0.55) * 100, (positions[pos][1] + 0.55) * 100, 100, 100, 5);
             // fill(0, 0, 255);
             // textAlign(CENTER, CENTER);
             // textSize(20);
