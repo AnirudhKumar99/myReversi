@@ -1,6 +1,6 @@
-function getIndex(arr,elt){
-    for(let a in arr){
-        if (arr[a][0]==elt[0] && arr[a][1]==elt[1]){
+function getIndex(arr, elt) {
+    for (let a in arr) {
+        if (arr[a][0] == elt[0] && arr[a][1] == elt[1]) {
             return a;
         }
     }
@@ -10,7 +10,7 @@ class Reversi {
     constructor() {
         //Array to store the alive coins' positions
         this.positions = [];
-        this.status=[];
+        this.status = [];
         this.changeColors = [];
         this.whites = 0;
         this.blacks = 0;
@@ -56,17 +56,24 @@ class Reversi {
         }
         return Arr;
     }
+    remObjDupes() {
+        for (let change of this.changeColors) {
+            let keys = Object.keys(change);
+            console.log(keys);
+        }
+    }
     possiblePos() {
         // Calculates all the empty positions where next coin can be placed
         // console.log('Here');
         this.emptyPositions = [];
+        // this.changeColors=[];
         // this.coins = [this.coinAt(3, 4), this.coinAt(3, 3), this.coinAt(3, 2)];
         for (let coin of this.coins) { // Loop through all the coins in the present state
             if (currentColor === coin.col) { // Check if the color matches with the current color
                 // console.log("\n")
                 // console.log('currentColor:',currentColor);
-                let px = int(coin.x / 100);// Extract the x position of the coin
-                let py = int(coin.y / 100);// Extract the y position of the coin
+                // let px = int(coin.x / 100);// Extract the x position of the coin
+                // let py = int(coin.y / 100);// Extract the y position of the coin
                 // console.log("coin:", px, py);
                 // Checking all the neighbouring positions of the coin
                 for (let i = -1; i <= 1; i++) {
@@ -103,8 +110,7 @@ class Reversi {
                                     else {
                                         // console.log('empty: ', px, py);
                                         this.emptyPositions.push([px, py]);
-                                        this.changeColors.push({ des: [px, py], src: src });
-
+                                        // this.changeColors.push({ des: [px, py], src: src });
                                         break;
                                     }
                                 }
@@ -125,10 +131,69 @@ class Reversi {
         }
         return false;
     }
-    update() {
+    colorChange(moux, mouy) {
+        console.log(moux, mouy);
+        let swicolor = (currentColor == 'white') ? 'black' : 'white';
+        let swi = (currentColor == 'white') ? color(0) : color(255);
+        console.log(swi,swicolor);
+        let placed = this.coinAt(moux, mouy);
+        for (let coin of this.coins) {
+            if (coin.col === placed.col && coin !== placed) {
+                // console.log(coin.x,coin.y);
+                let srcx = moux;
+                let srcy = mouy;
 
+                let desx = int(coin.x / 100);
+                let desy = int(coin.y / 100);
+                console.log(srcx, srcy, '\n', desx, desy);
+                if (srcx > desx) {
+                    let temp = srcx;
+                    srcx = desx;
+                    desx = temp;
+                    console.log('srcx>desx')
+                }
+                if (srcy > desy) {
+                    let temp = srcy;
+                    srcy = desy;
+                    desy = temp;
+                    console.log('srcy>desy')
+                }
+                if (srcx == desx) {
+                    console.log('srcx=desx')
+                    for (let i = srcy + 1; i < desy; i++) {
+                        console.log(i);
+                        this.coinAt(srcx, i).coinColor = swi;
+                        this.coinAt(srcx, i).col = swicolor;
+                    }
+                } else if (srcy == desy) {
+                    console.log('srcy=desy')
+                    for (let i = srcx + 1; i < desx; i++) {
+                        console.log(i);
+                        this.coinAt(i, srcy).coinColor = swi;
+                        this.coinAt(i, srcy).col = swicolor;
+                    }
+                } else {
+                    console.log('none in common')
+                    for (let i = srcx+1,j = srcy+1; ((i < desx)&&(j < desy)); i++,j++) {
+                        // for (let j = srcy+1; j < desy; j++) {
+                            console.log(i, j);
+                            this.coinAt(i, j).coinColor = swi;
+                            this.coinAt(i, j).col = swicolor;
+                        // }
+                    }
+                }
+                // console.log(srcx,srcy,'\n',desx,desy);
+                // if(srcx==desx){
+                //     for(let i=src)
+                // }
+
+            }
+        }
+    }
+    update() {
         let moux = int(mouseX / 100);
         let mouy = int(mouseY / 100);
+
         // console.log(this.isPoss(moux, mouy));
         if (this.isPoss(moux, mouy)) {
             // console.log('mouse cood ', moux, mouy);
@@ -136,12 +201,12 @@ class Reversi {
             // console.log(this.coinAt(moux, mouy))
             if (this.coinAt(moux, mouy) === null) {
                 // console.log('mouse cood ', moux, mouy);
-                this.status=[];
-                for(let i=0;i<64;i++){
+                this.status = [];
+                for (let i = 0; i < 64; i++) {
                     this.status.push(0)
                 }
-                let index=getIndex(this.positions,[moux,mouy]);
-                this.status[int(index)]=1;
+                let index = getIndex(this.positions, [moux, mouy]);
+                this.status[int(index)] = 1;
                 let co = new Coin(int((moux + 0.55) * 100), int((mouy + 0.55) * 100), 90, col, currentColor);
 
                 this.coins.push(co);
@@ -154,59 +219,10 @@ class Reversi {
             //     currentColor = (currentColor == 'white') ? 'white' : 'black';
             // }
         }
-        for (let change of this.changeColors) {
-            // let cur = currentColor
-            let swicolor = (currentColor == 'white') ? 'black' : 'white';
-            let swi = (currentColor == 'white') ? color(0) : color(255);
-            let src = change.src;
-            let des = change.des;
-            // console.log(moux, mouy)
-            // console.log(change.src, change.des);
-            if (des[0] == moux && des[1] == mouy) {
-                // console.log('here1');
-                if (des[0] < src[0]) {
-                    // console.log('here2');
-                    let temp = des[0];
-                    des[0] = src[0];
-                    src[0] = temp;
-                    // console.log(change.src, change.des, '\n\n');
-                } if (des[1] < src[1]) {
-                    // console.log('here3');
-                    let temp = des[1];
-                    des[1] = src[1];
-                    src[1] = temp;
-                    // console.log(change.src, change.des, '\n', '\n');
-                } if (des[1] == src[1]) {
-                    // console.log('Destination');
-                    for (let i = src[0] + 1; i < des[0]; i++) {
-                        // console.log(i, des[1]);
-                        // if (this.coinAt(i, j) !== null) {
-                        this.coinAt(i, des[1]).coinColor = swi;
-                        this.coinAt(i, des[1]).col = swicolor;
-                        // }
-                    }
-                } else if (des[0] == src[0]) {
-                    // console.log('Destination');
-                    for (let i = src[1] + 1; i < des[1]; i++) {
-                        // console.log(des[0], i);
-                        // if (this.coinAt(i, j) !== null) {
-                        this.coinAt(des[0], i).coinColor = swi;
-                        this.coinAt(des[0], i).col = swicolor;
-                        // }
-                    }
-                } else {
-                    for (let i = src[0] + 1; i < des[0]; i++) {
-                        for (let j = src[1] + 1; j < des[1]; j++) {
-                            // console.log(i, j);
-                            if (this.coinAt(i, j) !== null) {
-                                this.coinAt(i, j).coinColor = swi;
-                                this.coinAt(i, j).col = swicolor;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // this.remObjDupes();
+        this.colorChange(moux, mouy);
+
+
         this.possiblePos();
     }
     show() {
@@ -227,24 +243,24 @@ class Reversi {
             textSize(100);
             // text('WHITE: ' + whiteScore, width * 0.5, height / 2 + 25);
             // text('BLACK: ' + blackScore, width * 0.5, height / 2 - 25);
-            if(int(whiteScore)>int(blackScore)){
-                text('WHITE WINS',width/2,height/2-50);
-            }else if(int(blackScore)>int(whiteScore)){
-                text('BLACK WINS',width/2,height/2-50);
-            }else{
-                text('DRAW',width/2,height/2-50)
+            if (int(whiteScore) > int(blackScore)) {
+                text('WHITE WINS', width / 2, height / 2 - 50);
+            } else if (int(blackScore) > int(whiteScore)) {
+                text('BLACK WINS', width / 2, height / 2 - 50);
+            } else {
+                text('DRAW', width / 2, height / 2 - 50)
             }
             pop();
         }
-        let positions=this.positions;
+        let positions = this.positions;
         for (let pos in positions) {
             rectMode(CENTER);
             if (this.isPoss(positions[pos][0], positions[pos][1]))
                 fill(255, 0, 0, 100);
-            else if(this.status[pos])
+            else if (this.status[pos])
                 fill(30, 100, 30);
             else
-                fill(30,255,30);
+                fill(30, 255, 30);
 
             strokeWeight(3);
             rect((positions[pos][0] + 0.55) * 100, (positions[pos][1] + 0.55) * 100, 100, 100, 5);
