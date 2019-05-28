@@ -1,5 +1,5 @@
 let board;
-let currentColor = 'white';
+let currentColor = 'black';
 let whiteScore = 0, blackScore = 0;
 let floating = false;
 function setup() {
